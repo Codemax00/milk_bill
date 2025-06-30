@@ -18,8 +18,8 @@ function App() {
     reset
   } = useFileProcessing();
 
-  const handleFileUpload = (files: UploadedFile[], milkType?: 'cow' | 'buffalo' | 'both') => {
-    processFiles(files, milkType);
+  const handleFileUpload = (files: UploadedFile[], milkType?: 'cow' | 'buffalo' | 'both', rate?: number) => {
+    processFiles(files, milkType, rate);
   };
 
   return (

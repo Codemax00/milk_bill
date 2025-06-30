@@ -4,7 +4,7 @@ import { Upload, File, AlertCircle, CheckCircle, Loader2 } from 'lucide-react';
 import { UploadedFile } from '../types';
 
 interface FileUploadProps {
-  onFileUpload: (files: UploadedFile[], milkType?: 'cow' | 'buffalo' | 'both') => void;
+  onFileUpload: (files: UploadedFile[], milkType?: 'cow' | 'buffalo' | 'both', rate: number) => void;
   isProcessing: boolean;
 }
 
@@ -12,6 +12,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, isProcessi
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [showMilkTypeSelection, setShowMilkTypeSelection] = useState(false);
   const [selectedMilkType, setSelectedMilkType] = useState<'cow' | 'buffalo' | 'both'>('both');
+  const [rate, setRate] = useState(32);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newFiles: UploadedFile[] = acceptedFiles.map(file => ({
@@ -75,7 +76,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, isProcessi
   };
 
   const handleProcessFiles = () => {
-    onFileUpload(uploadedFiles, selectedMilkType);
+    onFileUpload(uploadedFiles, selectedMilkType, rate);
     setShowMilkTypeSelection(false);
   };
 
@@ -218,16 +219,29 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, isProcessi
             </div>
           </div>
 
+          <div className="flex items-center space-x-3 mb-6">
+            <label htmlFor="rate" className="text-md font-semibold text-red-600">Rate:</label>
+            <input
+              id="rate"
+              type="number"
+              className="border rounded px-2 py-1 w-24"
+              value={rate}
+              min={0}
+              step={0.1}
+              onChange={e => setRate(Number(e.target.value))}
+            />
+          </div>
+
           <div className="flex justify-end space-x-3">
             <button
               onClick={() => setShowMilkTypeSelection(false)}
-              className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
+              className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleProcessFiles}
-              className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium"
+              className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
             >
               Process Files
             </button>

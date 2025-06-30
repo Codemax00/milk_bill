@@ -8,7 +8,11 @@ export const useFileProcessing = () => {
   const [processedData, setProcessedData] = useState<ProcessedMilkData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const processFiles = useCallback(async (files: UploadedFile[], milkType: 'cow' | 'buffalo' | 'both' = 'both') => {
+  const processFiles = useCallback(async (
+    files: UploadedFile[],
+    milkType: 'cow' | 'buffalo' | 'both' = 'both',
+    rate: number = 32
+  ) => {
     if (files.length === 0) return;
 
     setIsProcessing(true);
@@ -30,7 +34,7 @@ export const useFileProcessing = () => {
       setCurrentStep('Structuring and formatting data...');
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      const processedData = OCRService.parseMilkData(extractedText, 32, milkType);
+      const processedData = OCRService.parseMilkData(extractedText, rate, milkType);
       
       setCurrentStep('Processing complete!');
       setProcessedData(processedData);

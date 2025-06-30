@@ -9,7 +9,10 @@ interface DataVisualizationProps {
 }
 
 export const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onExport }) => {
-  const formatCurrency = (amount: number) => `₹${amount.toFixed(2)}`;
+  const formatCurrency = (amount: number) => `₹${(amount ?? 0).toFixed(2)}`;
+
+  // Debug log
+  console.log('DataVisualization data:', data);
 
   // Local state for editable entries
   const [editableEntries, setEditableEntries] = useState(() => data.entries.map(entry => ({ ...entry, morning: entry.morning ? { ...entry.morning } : undefined, evening: entry.evening ? { ...entry.evening } : undefined, cowMilk: entry.cowMilk ? { ...entry.cowMilk } : undefined })));
@@ -123,7 +126,7 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onEx
     for (let i = 0; i < data.entries.length; i++) {
       const entry = data.entries[i];
       const y = 650 + (i * rowHeight);
-      ctx.fillText(entry.sNo ? String(entry.sNo) : '-', 100, y);
+      ctx.fillText(entry.sNo ?? '-', 100, y);
       ctx.fillText(entry.morning ? `${entry.morning.milkInLiters}L (${entry.morning.fatPercentage}%)` : '-', 350, y);
       ctx.fillText(entry.evening ? `${entry.evening.milkInLiters}L (${entry.evening.fatPercentage}%)` : '-', 600, y);
       ctx.fillText(entry.cowMilk ? `${entry.cowMilk.milkInLiters}L` : '-', 850, y);
@@ -195,31 +198,31 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onEx
           </div>
           {/* Right: Daily Entries Table */}
           <div className="md:w-2/3 w-full">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S.No</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Morning</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evening</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cow Milk</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
+        <div className="overflow-x-auto">
+          <table className="w-full">
+            <thead className="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">S.No</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Morning</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Evening</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cow Milk</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
                   {editableEntries.map((entry, index) => (
-                    <tr key={index} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                        {entry.sNo}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {entry.morning ? (
-                          <div className="space-y-1">
-                            <div className="flex items-center space-x-2">
+                <tr key={index} className="hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                    {entry.sNo ?? '-'}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {entry.morning ? (
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
                               <input
                                 type="number"
                                 className="w-16 border rounded px-1 text-secondary-600 font-medium"
-                                value={entry.morning.milkInLiters}
+                                value={entry.morning.milkInLiters ?? ''}
                                 onChange={e => handleCellChange(index, 'morning', 'milkInLiters', e.target.value)}
                                 step="0.1"
                                 min="0"
@@ -228,27 +231,27 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onEx
                               <input
                                 type="number"
                                 className="w-12 border rounded px-1 text-gray-600"
-                                value={entry.morning.fatPercentage}
+                                value={entry.morning.fatPercentage ?? ''}
                                 onChange={e => handleCellChange(index, 'morning', 'fatPercentage', e.target.value)}
                                 step="0.1"
                                 min="0"
                               />
                               <span className="text-gray-400">%</span>
                               <span className="text-gray-400">fat</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {entry.evening ? (
-                          <div className="space-y-1">
-                            <div className="flex items-center space-x-2">
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {entry.evening ? (
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
                               <input
                                 type="number"
                                 className="w-16 border rounded px-1 text-secondary-600 font-medium"
-                                value={entry.evening.milkInLiters}
+                                value={entry.evening.milkInLiters ?? ''}
                                 onChange={e => handleCellChange(index, 'evening', 'milkInLiters', e.target.value)}
                                 step="0.1"
                                 min="0"
@@ -257,64 +260,64 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onEx
                               <input
                                 type="number"
                                 className="w-12 border rounded px-1 text-gray-600"
-                                value={entry.evening.fatPercentage}
+                                value={entry.evening.fatPercentage ?? ''}
                                 onChange={e => handleCellChange(index, 'evening', 'fatPercentage', e.target.value)}
                                 step="0.1"
                                 min="0"
                               />
                               <span className="text-gray-400">%</span>
                               <span className="text-gray-400">fat</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {entry.cowMilk ? (
-                          <div className="space-y-1">
-                            <div className="flex items-center space-x-2">
+                        </div>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {entry.cowMilk ? (
+                      <div className="space-y-1">
+                        <div className="flex items-center space-x-2">
                               <input
                                 type="number"
                                 className="w-16 border rounded px-1 text-accent-600 font-medium"
-                                value={entry.cowMilk.milkInLiters}
+                                value={entry.cowMilk.milkInLiters ?? ''}
                                 onChange={e => handleCellChange(index, 'cowMilk', 'milkInLiters', e.target.value)}
                                 step="0.1"
                                 min="0"
                               />
                               <span className="text-gray-400">L</span>
-                              <span className="text-gray-400">•</span>
-                              <span className="text-gray-600">{formatCurrency(entry.cowMilk.amount || 0)}</span>
-                            </div>
-                          </div>
-                        ) : (
-                          <span className="text-gray-400">-</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <div className="space-y-1">
-                          <div className="font-medium">{entry.totalMilk?.toFixed(2)}L</div>
-                          <div className="text-green-600 font-medium">{formatCurrency(entry.totalAmount || 0)}</div>
+                          <span className="text-gray-400">•</span>
+                              <span className="text-gray-600">{formatCurrency(entry.cowMilk.amount ?? 0)}</span>
                         </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {/* Summary Row at the bottom of the table */}
-              <div className="w-full border-t border-gray-200 bg-gray-50">
-                <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 gap-4">
-                  <div className="flex items-center gap-6">
-                    <span className="font-semibold text-gray-700">Total Milk:</span>
-                    <span className="text-primary-700 font-bold">{data.totalMilk}L</span>
-                  </div>
-                  <div className="flex items-center gap-6">
-                    <span className="font-semibold text-gray-700">Avg. Fat %:</span>
-                    <span className="text-secondary-700 font-bold">{data.summary.averageFat}%</span>
-                  </div>
-                  <div className="flex items-center gap-6">
-                    <span className="font-semibold text-gray-700">Total Amount:</span>
-                    <span className="text-green-700 font-bold">{formatCurrency(data.totalAmount)}</span>
+                      </div>
+                    ) : (
+                      <span className="text-gray-400">-</span>
+                    )}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    <div className="space-y-1">
+                      <div className="font-medium">{(entry.totalMilk ?? 0).toFixed(2)}L</div>
+                      <div className="text-green-600 font-medium">{formatCurrency(entry.totalAmount ?? 0)}</div>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {/* Summary Row at the bottom of the table */}
+          <div className="w-full border-t border-gray-200 bg-gray-50">
+            <div className="flex flex-col md:flex-row justify-between items-center px-6 py-4 gap-4">
+              <div className="flex items-center gap-6">
+                <span className="font-semibold text-gray-700">Total Milk:</span>
+                <span className="text-primary-700 font-bold">{data.totalMilk}L</span>
+              </div>
+              <div className="flex items-center gap-6">
+                <span className="font-semibold text-gray-700">Avg. Fat %:</span>
+                <span className="text-secondary-700 font-bold">{data.summary.averageFat}%</span>
+              </div>
+              <div className="flex items-center gap-6">
+                <span className="font-semibold text-gray-700">Total Amount:</span>
+                <span className="text-green-700 font-bold">{formatCurrency(data.totalAmount)}</span>
                   </div>
                 </div>
               </div>
