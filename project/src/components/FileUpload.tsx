@@ -234,6 +234,24 @@ export const FileUpload: React.FC<FileUploadProps> = ({ onFileUpload, isProcessi
           </div>
         </div>
       )}
+
+      {/* Rate Section at the bottom */}
+      <div className="fixed bottom-0 left-0 w-full bg-white border-t border-gray-200 p-4 flex justify-center items-center z-50">
+        <label htmlFor="rate-input" className="mr-2 font-medium text-gray-700">Rate:</label>
+        <input
+          id="rate-input"
+          type="number"
+          min="0"
+          step="0.01"
+          placeholder="Enter rate"
+          className="border rounded px-3 py-1 w-32 mr-4 focus:outline-none focus:ring-2 focus:ring-primary-400"
+        />
+        <button
+          className="bg-primary-600 text-white px-4 py-1 rounded hover:bg-primary-700 transition-colors font-medium"
+        >
+          Save Rate
+        </button>
+      </div>
     </div>
   );
 };
