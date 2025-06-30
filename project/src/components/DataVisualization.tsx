@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { ProcessedMilkData } from '../types';
 import { Calendar, TrendingUp, Droplets, DollarSign, Download, Image } from 'lucide-react';
 import { format } from 'date-fns';
@@ -10,6 +10,48 @@ interface DataVisualizationProps {
 
 export const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onExport }) => {
   const formatCurrency = (amount: number) => `₹${amount.toFixed(2)}`;
+
+  // Local state for editable entries
+  const [editableEntries, setEditableEntries] = useState(() => data.entries.map(entry => ({ ...entry, morning: entry.morning ? { ...entry.morning } : undefined, evening: entry.evening ? { ...entry.evening } : undefined, cowMilk: entry.cowMilk ? { ...entry.cowMilk } : undefined })));
+
+  // Handle cell change
+  const handleCellChange = (index: number, field: 'morning' | 'evening' | 'cowMilk', subfield: 'milkInLiters' | 'fatPercentage', value: string) => {
+    setEditableEntries(prev => {
+      const updated = [...prev];
+      if (field === 'cowMilk') {
+        if (!updated[index].cowMilk) updated[index].cowMilk = { milkInLiters: 0, rate: 32, amount: 0 };
+        if (subfield === 'milkInLiters') {
+          updated[index].cowMilk.milkInLiters = parseFloat(value) || 0;
+          updated[index].cowMilk.amount = updated[index].cowMilk.milkInLiters * (updated[index].cowMilk.rate || 32);
+        }
+      } else {
+        if (!updated[index][field]) updated[index][field] = { milkInLiters: 0, fatPercentage: 0 };
+        if (subfield === 'milkInLiters') {
+          updated[index][field].milkInLiters = parseFloat(value) || 0;
+        } else {
+          updated[index][field].fatPercentage = parseFloat(value) || 0;
+        }
+      }
+      // Recalculate totals
+      let totalMilk = 0;
+      let totalAmount = 0;
+      if (updated[index].morning) {
+        totalMilk += updated[index].morning.milkInLiters;
+        totalAmount += updated[index].morning.milkInLiters * updated[index].morning.fatPercentage * 5;
+      }
+      if (updated[index].evening) {
+        totalMilk += updated[index].evening.milkInLiters;
+        totalAmount += updated[index].evening.milkInLiters * updated[index].evening.fatPercentage * 5;
+      }
+      if (updated[index].cowMilk) {
+        totalMilk += updated[index].cowMilk.milkInLiters;
+        totalAmount += updated[index].cowMilk.amount;
+      }
+      updated[index].totalMilk = totalMilk;
+      updated[index].totalAmount = totalAmount;
+      return updated;
+    });
+  };
 
   const exportAsImage = async () => {
     // Calculate dynamic canvas height based on number of entries
@@ -165,7 +207,7 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onEx
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {data.entries.map((entry, index) => (
+                  {editableEntries.map((entry, index) => (
                     <tr key={index} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {entry.sNo}
@@ -174,9 +216,25 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onEx
                         {entry.morning ? (
                           <div className="space-y-1">
                             <div className="flex items-center space-x-2">
-                              <span className="text-secondary-600 font-medium">{entry.morning.milkInLiters}L</span>
-                              <span className="text-gray-400">•</span>
-                              <span className="text-gray-600">{entry.morning.fatPercentage}% fat</span>
+                              <input
+                                type="number"
+                                className="w-16 border rounded px-1 text-secondary-600 font-medium"
+                                value={entry.morning.milkInLiters}
+                                onChange={e => handleCellChange(index, 'morning', 'milkInLiters', e.target.value)}
+                                step="0.1"
+                                min="0"
+                              />
+                              <span className="text-gray-400">L</span>
+                              <input
+                                type="number"
+                                className="w-12 border rounded px-1 text-gray-600"
+                                value={entry.morning.fatPercentage}
+                                onChange={e => handleCellChange(index, 'morning', 'fatPercentage', e.target.value)}
+                                step="0.1"
+                                min="0"
+                              />
+                              <span className="text-gray-400">%</span>
+                              <span className="text-gray-400">fat</span>
                             </div>
                           </div>
                         ) : (
@@ -187,9 +245,25 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onEx
                         {entry.evening ? (
                           <div className="space-y-1">
                             <div className="flex items-center space-x-2">
-                              <span className="text-secondary-600 font-medium">{entry.evening.milkInLiters}L</span>
-                              <span className="text-gray-400">•</span>
-                              <span className="text-gray-600">{entry.evening.fatPercentage}% fat</span>
+                              <input
+                                type="number"
+                                className="w-16 border rounded px-1 text-secondary-600 font-medium"
+                                value={entry.evening.milkInLiters}
+                                onChange={e => handleCellChange(index, 'evening', 'milkInLiters', e.target.value)}
+                                step="0.1"
+                                min="0"
+                              />
+                              <span className="text-gray-400">L</span>
+                              <input
+                                type="number"
+                                className="w-12 border rounded px-1 text-gray-600"
+                                value={entry.evening.fatPercentage}
+                                onChange={e => handleCellChange(index, 'evening', 'fatPercentage', e.target.value)}
+                                step="0.1"
+                                min="0"
+                              />
+                              <span className="text-gray-400">%</span>
+                              <span className="text-gray-400">fat</span>
                             </div>
                           </div>
                         ) : (
@@ -200,9 +274,17 @@ export const DataVisualization: React.FC<DataVisualizationProps> = ({ data, onEx
                         {entry.cowMilk ? (
                           <div className="space-y-1">
                             <div className="flex items-center space-x-2">
-                              <span className="text-accent-600 font-medium">{entry.cowMilk.milkInLiters}L</span>
+                              <input
+                                type="number"
+                                className="w-16 border rounded px-1 text-accent-600 font-medium"
+                                value={entry.cowMilk.milkInLiters}
+                                onChange={e => handleCellChange(index, 'cowMilk', 'milkInLiters', e.target.value)}
+                                step="0.1"
+                                min="0"
+                              />
+                              <span className="text-gray-400">L</span>
                               <span className="text-gray-400">•</span>
-                              <span className="text-gray-600">{formatCurrency(entry.cowMilk.amount)}</span>
+                              <span className="text-gray-600">{formatCurrency(entry.cowMilk.amount || 0)}</span>
                             </div>
                           </div>
                         ) : (
