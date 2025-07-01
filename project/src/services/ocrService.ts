@@ -3,45 +3,17 @@ import { MilkLogEntry, ProcessedMilkData } from '../types';
 // Simulated OCR service for demonstration
 export class OCRService {
   static async extractTextFromImage(file: File): Promise<string> {
-    // Simulated delay for OCR processing
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // Mock OCR text extraction - in real implementation, this would use Tesseract.js or Google Vision API
-    return `
-      Milk Collection Log - Customer ID: CUS001
-      Date Range: 16/06/2025 - 30/06/2025
-      
-      S.No  Date       Morning    Evening    Cow Milk
-      16    30/06/25   3.0-5.0    3.8-7.8    
-      17    30/06/25   3.0-7.4    3.0-9.1    
-      18    27/06/25   2.7-8.0    3.1-8.7    
-      19    3.0-6.4    3.4-7.15   
-      20    2.9-7.1    3.8-7.15   
-      21    3.1-6.5    3.3-7.7    
-      22    2.9-6.0    3.3-7.7    
-      23    2.8-7.1    3.2-7.2    
-      24    3.2-7.8    3.6-7.6    
-      25    1.1-8.3    3.3-7.6    
-      26    1.5-9.5    2.6-8.0    
-      27    2.5-6.7    3.5-7.2    
-      28    2.7-7.1    3.4-7.2    
-      29    2.5-6.7    3.0-7.3    
-      30    2.0-5.8    3.0-7.3    
-      1     2.0-6.0    2.0-6.0    
-      2     1.6-6.5    1.6-6.5    
-      3     1.4-7.0    1.4-7.0    
-      4     1.5-7.0    1.5-7.0    
-      5     1.5-7.0    1.5-7.0    
-      6     1.2-7.5    1.2-7.5    
-      7     2.2-7.8    2.2-7.8    
-      8     1.7-8.0    1.7-8.0    
-      9     1.7-7.7    1.7-7.7    
-      10    1.6-8.2    1.6-8.2    
-      11    1.8-8.5    1.8-8.5    
-      12    1.5-8.0    1.5-8.0    
-      13    1.7-8.5    1.7-8.5    
-      14    1.2-10.0   1.2-10.0   
-    `;
+    const formData = new FormData();
+    formData.append('file', file);
+    const response = await fetch('https://milkbill.netlify.app/ocr', {
+      method: 'POST',
+      body: formData,
+    });
+    if (!response.ok) {
+      throw new Error(`OCR API error: ${await response.text()}`);
+    }
+    const data = await response.json();
+    return data.text || '';
   }
 
   static parseMilkData(ocrText: string, cowRate: number = 32, milkType: 'cow' | 'buffalo' | 'both' = 'both'): ProcessedMilkData {
